@@ -1,4 +1,4 @@
-#include <application.h>
+#include "application.h"
 
 square_application* square_application_init(void) {
 	square_application* application = malloc(sizeof(*application));
