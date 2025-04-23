@@ -2,9 +2,7 @@
 #include <string.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
-
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+#include <application.h>
 
 const int SHOOTER_WIDTH = 20;
 const int SHOOTER_HEIGHT = 20;
@@ -16,13 +14,7 @@ const int BULLET_HEIGHT = 10;
 int main (int argc, char* args[]) {
 	Uint32 i;
 	
-	FILE* log_file;
-
-	SDL_Window* window = NULL;
-
-	TTF_Font* font = NULL;
-
-	SDL_Renderer* renderer = NULL;
+	square_application* application = NULL;
 
 	char text_content[50] = { '\0' };
 
@@ -51,54 +43,17 @@ int main (int argc, char* args[]) {
 	SDL_Rect shooter_actor = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SHOOTER_WIDTH, SHOOTER_HEIGHT };
 
 
-	log_file = fopen("/logs/logfile.txt", "w");
+	application = square_application_init();
 
-	if (log_file == NULL) {
-		printf("Error opening log file for writing");
-
+	if (application == NULL) {
 		return 1;
 	}
 
-	if (SDL_Init( SDL_INIT_VIDEO ) < 0) {
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-
-		return 1;
-	}
-
-	if (TTF_Init() == -1) {
-		printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
-			
-		return 1;
-	}
-
-	window = SDL_CreateWindow("RockShooter", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-
-	if (window == NULL) {
-		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-		
-		return 1;
-	} 
-
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-	if (renderer == NULL) {
-		printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
-
-		return 1;
-	}
-
-	font = TTF_OpenFont("resources/ARIAL.TTF", 24);
-
-	if (font == NULL) {
-		printf("Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError());
-
-		return 1;
-	}
 
 	bullet_actors = malloc(sizeof(*bullet_actors));
 
 	if (bullet_actors == NULL) {
-		printf("Error allocating bullet_actors");
+		fprintf(application->log_file, "Error allocating bullet_actors");
 
 		return 1;
 	}
@@ -151,7 +106,7 @@ int main (int argc, char* args[]) {
 						bullet_actors = realloc(bullet_actors, (bullet_actors_size + 1) * sizeof(*bullet_actors));
 
 						if (bullet_actors == NULL) {
-							printf("Error re-allocating bullet_actors");
+							fprintf(application->log_file, "Error re-allocating bullet_actors");
 					
 							break;
 						}
@@ -173,21 +128,17 @@ int main (int argc, char* args[]) {
 		}
 
 
-		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_SetRenderDrawColor(application->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-		SDL_RenderClear(renderer);
+		SDL_RenderClear(application->renderer);
 		
-		SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF); 
+		SDL_SetRenderDrawColor(application->renderer, 0x00, 0xFF, 0x00, 0xFF); 
 
 		current_time = SDL_GetTicks();
 
-		// fprintf(fptr, "Start time: %d\n", start_time);
-		// fprintf(fptr, "Current time: %d\n", current_time);
-		// fprintf(fptr, "Diff time: %d\n", current_time - start_time);
-
 
 		for (i = 0; i < bullet_actors_size; i++) {
-			SDL_RenderFillRect(renderer, &bullet_actors[i]);
+			SDL_RenderFillRect(application->renderer, &bullet_actors[i]);
 
 			if ((current_time - start_time) >= 60) {
 
@@ -207,52 +158,44 @@ int main (int argc, char* args[]) {
 			start_time = current_time;
 		}
 
-		SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);        
+		SDL_SetRenderDrawColor(application->renderer, 0xFF, 0x00, 0x00, 0xFF);        
 		
-		SDL_RenderFillRect(renderer, &shooter_actor);
+		SDL_RenderFillRect(application->renderer, &shooter_actor);
 		
 
 		sprintf(text_content, "Bullets: %d", bullet_actors_created);
 
-		text_surface = TTF_RenderText_Solid(font, text_content, text_color);
+		text_surface = TTF_RenderText_Solid(application->font, text_content, text_color);
 
 		if (text_surface == NULL) {
-			printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
+			fprintf(application->log_file, "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
 	
 			break;
 		}
 		
-		text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+		text_texture = SDL_CreateTextureFromSurface(application->renderer, text_surface);
 	
 		
 		SDL_FreeSurface(text_surface);
 	
 		if (text_texture == NULL) {
-			printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
+			fprintf(application->log_file, "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
 	
 			break;
 		}
 		
-		SDL_RenderCopy(renderer, text_texture, NULL, &text_position);
+		SDL_RenderCopy(application->renderer, text_texture, NULL, &text_position);
 
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(application->renderer);
 	}
+
 
 	free(bullet_actors);
 
-	fclose(log_file);
-
-	TTF_CloseFont(font);
-
 	SDL_DestroyTexture(text_texture);
 
-	SDL_DestroyRenderer(renderer);
+	square_application_cleanup(application);
 
-	SDL_DestroyWindow(window);
-
-	TTF_Quit();
-
-	SDL_Quit();
 
 	return 0;
 }
