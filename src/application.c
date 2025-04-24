@@ -36,7 +36,7 @@ square_application* square_application_init(void) {
 		return NULL;
 	}
 
-	application->window = SDL_CreateWindow("SquareFight", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	application->window = SDL_CreateWindow(APPLICATION_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
 	if (application->window == NULL) {
 		fprintf(application->log_file, "Window could not be created! SDL_Error: %s\n", SDL_GetError());

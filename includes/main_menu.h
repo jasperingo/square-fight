@@ -21,6 +21,6 @@ typedef struct {
 
 square_main_menu* square_main_menu_init(square_application* application);
 
-void square_main_menu_cleanup(square_main_menu* main_menu, square_application* application);
+void square_main_menu_cleanup(square_main_menu* main_menu);
 
 #endif

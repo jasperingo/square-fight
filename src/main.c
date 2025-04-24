@@ -5,13 +5,6 @@
 #include "application.h"
 #include "main_menu.h"
 
-const int SHOOTER_WIDTH = 20;
-const int SHOOTER_HEIGHT = 20;
-
-const int BULLET_WIDTH = 10;
-const int BULLET_HEIGHT = 10;
-
-
 int main(int argc, char* args[]) {
 	Uint8 i;
 
@@ -23,11 +16,17 @@ int main(int argc, char* args[]) {
 
 	SDL_Color text_color = { 0, 0, 0 };
 
+	SDL_Surface* title_surface = NULL;
+
+	SDL_Texture* title_texture = NULL;
+
+	SDL_Rect title_position = { 10, 10, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 8 };
+
 	SDL_Event event; 
 
 	SDL_Rect red_square = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, 200, 200 };
 
-	SDL_Rect blue_square = { (SCREEN_WIDTH / 4) + 150, SCREEN_HEIGHT / 4, 150, 150 };
+	SDL_Rect blue_square = { (SCREEN_WIDTH / 4) + 150, (SCREEN_HEIGHT / 4) - 25, 150, 150 };
 
 
 	application = square_application_init();
@@ -39,6 +38,34 @@ int main(int argc, char* args[]) {
 	main_menu = square_main_menu_init(application);
 
 	if (main_menu == NULL) {
+		square_application_cleanup(application);
+
+		return 1;
+	}
+
+	title_surface = TTF_RenderText_Solid(application->font, APPLICATION_NAME, text_color);
+
+	if (title_surface == NULL) {
+		square_main_menu_cleanup(main_menu);
+
+		square_application_cleanup(application);
+
+		fprintf(application->log_file, "Error creating title text surface: %s\n", TTF_GetError());
+
+		return 1;
+	}
+	
+	title_texture = SDL_CreateTextureFromSurface(application->renderer, title_surface);
+
+	SDL_FreeSurface(title_surface);
+
+	if (title_texture == NULL) {
+		square_main_menu_cleanup(main_menu);
+
+		square_application_cleanup(application);
+
+		fprintf(application->log_file, "Error creating title texture: %s\n", SDL_GetError());
+
 		return 1;
 	}
 
@@ -46,8 +73,10 @@ int main(int argc, char* args[]) {
 
 	SDL_RenderClear(application->renderer);
 
-	SDL_SetRenderDrawColor(application->renderer, 0x00, 0x00, 0xFF, 0xFF);        
-		
+	SDL_SetRenderDrawColor(application->renderer, 0x00, 0x00, 0xFF, 0xFF);     
+
+	SDL_RenderCopy(application->renderer, title_texture, NULL, &title_position);
+	
 	SDL_RenderFillRect(application->renderer, &blue_square);
 
 	SDL_SetRenderDrawColor(application->renderer, 0xFF, 0x00, 0x00, 0xFF);        
@@ -96,41 +125,9 @@ int main(int argc, char* args[]) {
 			}
 		}
 
-
-		// SDL_SetRenderDrawColor(application->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-		// SDL_RenderClear(application->renderer);
-		
-		// SDL_SetRenderDrawColor(application->renderer, 0x00, 0xFF, 0x00, 0xFF); 
-	
-
-		// sprintf(text_content, "Bullets: %d", 1);
-
-		// text_surface = TTF_RenderText_Solid(application->font, text_content, text_color);
-
-		// if (text_surface == NULL) {
-		// 	fprintf(application->log_file, "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-	
-		// 	break;
-		// }
-		
-		// text_texture = SDL_CreateTextureFromSurface(application->renderer, text_surface);
-	
-		
-		// SDL_FreeSurface(text_surface);
-	
-		// if (text_texture == NULL) {
-		// 	fprintf(application->log_file, "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
-	
-		// 	break;
-		// }
-		
-		// SDL_RenderCopy(application->renderer, text_texture, NULL, &text_position);
-
-		// SDL_RenderPresent(application->renderer);
 	}
 
-	square_main_menu_cleanup(main_menu, application);
+	square_main_menu_cleanup(main_menu);
 
 	square_application_cleanup(application);
 

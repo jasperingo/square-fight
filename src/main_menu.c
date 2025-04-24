@@ -29,7 +29,7 @@ square_main_menu* square_main_menu_init(square_application* application) {
 		text_surface = TTF_RenderText_Solid(application->font, text_contents[i], text_color);
 
 		if (text_surface == NULL) {
-			square_main_menu_cleanup(main_menu, application);
+			square_main_menu_cleanup(main_menu);
 
 			fprintf(application->log_file, "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
 	
@@ -41,7 +41,7 @@ square_main_menu* square_main_menu_init(square_application* application) {
 		SDL_FreeSurface(text_surface);
 	
 		if (main_menu->items[i].texture == NULL) {
-			square_main_menu_cleanup(main_menu, application);
+			square_main_menu_cleanup(main_menu);
 
 			fprintf(application->log_file, "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
 	
@@ -56,7 +56,7 @@ square_main_menu* square_main_menu_init(square_application* application) {
 	return main_menu;
 }
 
-void square_main_menu_cleanup(square_main_menu* main_menu, square_application* application) {
+void square_main_menu_cleanup(square_main_menu* main_menu) {
 	Uint8 i;
 
 	for (i = 0; i < main_menu->size; i++) {

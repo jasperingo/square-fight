@@ -7,6 +7,8 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
+#define APPLICATION_NAME "SquareFight"
+
 typedef struct {
   FILE* log_file;
 	TTF_Font* font;
