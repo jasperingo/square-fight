@@ -5,10 +5,14 @@
 #include "application.h"
 #include "main_menu.h"
 
-int main(int argc, char* args[]) {
+int main (int argc, char* args[]) {
 	Uint8 i;
 
 	int should_quit = 0;
+
+	int mouse_x = 0;
+
+	int mouse_y = 0;
 	
 	square_application* application = NULL;
 
@@ -96,33 +100,28 @@ int main(int argc, char* args[]) {
 
 			if (event.type == SDL_QUIT) {
 				should_quit = 1;
-			} else if (event.type == SDL_KEYDOWN) {
-				
-				switch (event.key.keysym.sym) {
-					case SDLK_UP:
-						
-						break;
+			} else if (event.type == SDL_MOUSEBUTTONDOWN) {
+				SDL_GetMouseState(&mouse_x, &mouse_y);
 
-					case SDLK_DOWN:
-						
+				for (i = 0; i < main_menu->size; i++) {
+					if (
+						main_menu->items[i].position.x <= mouse_x &&
+						(main_menu->items[i].position.x + main_menu->items[i].position.w) >= mouse_x &&
+						main_menu->items[i].position.y <= mouse_y &&
+						(main_menu->items[i].position.y + main_menu->items[i].position.h) >= mouse_y
+					) {
+						fprintf(application->log_file, "Main menu item: %d\n", (i + 1));
+						fflush(application->log_file);
 						break;
+					}
+				}
 
-					case SDLK_LEFT:
-						
-						break;
-
-					case SDLK_RIGHT:
-						
-						break;
-
-					case SDLK_SPACE:
-
-						break;
-
-					default:
-						break;
+				if (i == main_menu->size) {
+					fprintf(application->log_file, "No main menu item clicked\n");
+					fflush(application->log_file);
 				}
 			}
+
 		}
 
 	}
