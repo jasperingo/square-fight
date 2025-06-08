@@ -9,6 +9,11 @@
 
 #define APPLICATION_NAME "SquareFight"
 
+#define QUIT_SCREEN 0
+#define HOME_SCREEN 1
+#define GAME_SCREEN 2
+#define SCORES_SCREEN 3
+
 typedef struct {
   FILE* log_file;
 	TTF_Font* font;
@@ -19,5 +24,11 @@ typedef struct {
 square_application* square_application_init(void);
 
 void square_application_cleanup(square_application* application);
+
+int home_screen(square_application* application);
+
+int game_screen(square_application* application);
+
+int scores_screen(square_application* application);
 
 #endif

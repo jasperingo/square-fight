@@ -7,9 +7,11 @@ square_main_menu* square_main_menu_init(square_application* application) {
 
 	SDL_Color text_color = { 0, 0, 0 };
 
-	char* text_contents[MENU_SIZE] = { "Play", "Scores", "Quit" };
+	char* contents[MENU_SIZE] = { "Play", "Scores", "Quit" };
 
-	SDL_Rect text_positions[MENU_SIZE] = {
+	int screens[MENU_SIZE] = { GAME_SCREEN, SCORES_SCREEN, QUIT_SCREEN };
+
+	SDL_Rect positions[MENU_SIZE] = {
 		{ SCREEN_WIDTH - MENU_ITEM_WIDTH - 20, SCREEN_HEIGHT - (MENU_ITEM_HEIGHT * 3) - 30, MENU_ITEM_WIDTH, MENU_ITEM_HEIGHT },
 		{ SCREEN_WIDTH - MENU_ITEM_WIDTH - 20, SCREEN_HEIGHT - (MENU_ITEM_HEIGHT * 2) - 20, MENU_ITEM_WIDTH, MENU_ITEM_HEIGHT },
 		{ SCREEN_WIDTH - MENU_ITEM_WIDTH - 20, SCREEN_HEIGHT - (MENU_ITEM_HEIGHT * 1) - 10, MENU_ITEM_WIDTH, MENU_ITEM_HEIGHT },
@@ -26,7 +28,7 @@ square_main_menu* square_main_menu_init(square_application* application) {
 	main_menu->size = 0;
 
 	for (i = 0; i < MENU_SIZE; i++) {
-		text_surface = TTF_RenderText_Solid(application->font, text_contents[i], text_color);
+		text_surface = TTF_RenderText_Solid(application->font, contents[i], text_color);
 
 		if (text_surface == NULL) {
 			square_main_menu_cleanup(main_menu);
@@ -48,7 +50,9 @@ square_main_menu* square_main_menu_init(square_application* application) {
 			return NULL;
 		}
 
-		main_menu->items[i].position = text_positions[i];
+		main_menu->items[i].screen = screens[i];
+
+		main_menu->items[i].position = positions[i];
 
 		main_menu->size++;
 	}

@@ -10,8 +10,7 @@ const int SHOOTER_HEIGHT = 20;
 const int BULLET_WIDTH = 10;
 const int BULLET_HEIGHT = 10;
 
-
-int game(square_application* application) {
+int game_screen(square_application* application) {
 	Uint32 i;
 
 	char text_content[50] = { '\0' };
