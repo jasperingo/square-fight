@@ -2,7 +2,7 @@
 #include <string.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include <application.h>
+#include "application.h"
 
 const int SHOOTER_WIDTH = 20;
 const int SHOOTER_HEIGHT = 20;
