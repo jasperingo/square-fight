@@ -18,14 +18,31 @@
 
 #define ENEMY_X_POSITIONS_SIZE 32
 
+void remove_actor(SDL_Rect** actors, Uint32 size, Uint32 index) {
+    
+	SDL_Rect* temp = malloc((size - 1) * sizeof(**actors));
+
+	if (index != 0) {
+		memmove((void *) temp, (void *) (*actors), index * sizeof(**actors)); // copy everything BEFORE the index
+	}
+
+	if (index != (size - 1)) {
+		memmove((void *) (temp + index), (void *) ((*actors) + index + 1), (size - index - 1) * sizeof(**actors)); // copy everything AFTER the index
+	}
+
+	free(*actors);
+
+	*actors = temp;
+}
+
 int game_screen(square_application* application) {
-	Uint32 i;
+	Uint32 i, j;
 
 	int selected = 0;
 
 	int next_screen = HOME_SCREEN;
 
-	unsigned int game_is_over = 0;
+	Uint8 game_is_over = 0;
 
 	char text_content[50] = { '\0' };
 
@@ -79,6 +96,8 @@ int game_screen(square_application* application) {
 		0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 
 		320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620,
 	};
+
+	Uint8 enemy_killed = 0;
 
 	SDL_Rect* enemy_actors = NULL;
 
@@ -306,11 +325,9 @@ int game_screen(square_application* application) {
 			if ((move_actors_current_time - move_actors_start_time) >= MOVE_ACTORS_TIME_LIMIT) {
 
 				if (bullet_actors[i].y <= 0) {
+					remove_actor(&bullet_actors, bullet_actors_size, i);
+
 					bullet_actors_size--;
-
-					memset((void *) bullet_actors, 0, sizeof(*bullet_actors));
-
-					memmove((void *) bullet_actors, (void *) (bullet_actors + 1), bullet_actors_size * sizeof(*bullet_actors));
 				} else {
 					bullet_actors[i].y -= 4;
 				}
@@ -323,20 +340,40 @@ int game_screen(square_application* application) {
 		for (i = 0; i < enemy_actors_size; i++) {
 			SDL_RenderFillRect(application->renderer, &enemy_actors[i]);
 
+			enemy_killed = 0;
+
 			if ((move_actors_current_time - move_actors_start_time) >= MOVE_ACTORS_TIME_LIMIT) {
 
-				if (enemy_actors[i].y >= SCREEN_HEIGHT) {
-					enemy_actors_size--;
+				for (j = 0; j < bullet_actors_size; j++) {
+					if (
+						enemy_actors[i].x < (bullet_actors[j].x + bullet_actors[j].w) &&
+						(enemy_actors[i].x + enemy_actors[i].w) > bullet_actors[j].x &&
+						enemy_actors[i].y < (bullet_actors[j].y + bullet_actors[j].h) &&
+						(enemy_actors[i].y + enemy_actors[i].h) > bullet_actors[j].y
+					) {
+						enemy_killed = 1;
 
-					memset((void *) enemy_actors, 0, sizeof(*enemy_actors));
+						remove_actor(&enemy_actors, enemy_actors_size, i);
+						enemy_actors_size--;
 
-					memmove((void *) enemy_actors, (void *) (enemy_actors + 1), enemy_actors_size * sizeof(*enemy_actors));
-				} else {
-					enemy_actors[i].y += 4;
+						remove_actor(&bullet_actors, bullet_actors_size, j);
+						bullet_actors_size--;
+					}
+				}
+
+				if (enemy_killed == 0) {
+					if (enemy_actors[i].y >= SCREEN_HEIGHT) {
+						remove_actor(&enemy_actors, enemy_actors_size, i);
+
+						enemy_actors_size--;
+					} else {
+						enemy_actors[i].y += 4;
+					}
 				}
 			}
 
 			if (
+				enemy_killed == 0 &&
 				enemy_actors[i].x < (shooter_actor.x + shooter_actor.w) &&
 				(enemy_actors[i].x + enemy_actors[i].w) > shooter_actor.x &&
 				enemy_actors[i].y < (shooter_actor.y + shooter_actor.h) &&
