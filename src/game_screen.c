@@ -43,6 +43,8 @@ int game_screen(square_application* application) {
 	int next_screen = HOME_SCREEN;
 
 	Uint8 game_is_over = 0;
+	
+	Uint64 high_socre = 0;
 
 	char text_content[50] = { '\0' };
 
@@ -85,8 +87,6 @@ int game_screen(square_application* application) {
 	SDL_Rect* temp_bullet_actors = NULL;
 	
 	Uint32 bullet_actors_size = 0;
-
-	int bullet_actors_created = 0;
 
 	SDL_Rect shooter_actor = { SCREEN_WIDTH / 2, SCREEN_HEIGHT - (SHOOTER_HEIGHT * 2), SHOOTER_WIDTH, SHOOTER_HEIGHT };
 
@@ -265,8 +265,6 @@ int game_screen(square_application* application) {
 						bullet_actors[bullet_actors_size].h = BULLET_HEIGHT;
 			
 						bullet_actors_size++;
-			
-						bullet_actors_created++;
 						break;
 
 					default:
@@ -353,6 +351,8 @@ int game_screen(square_application* application) {
 					) {
 						enemy_killed = 1;
 
+						high_socre++;
+
 						remove_actor(&enemy_actors, enemy_actors_size, i);
 						enemy_actors_size--;
 
@@ -396,7 +396,7 @@ int game_screen(square_application* application) {
 		SDL_RenderFillRect(application->renderer, &header);
 		
 
-		sprintf(text_content, "Score: %d", bullet_actors_created);
+		sprintf(text_content, "Score: %d", high_socre);
 
 		score_surface = TTF_RenderText_Solid(application->font, text_content, text_color);
 
