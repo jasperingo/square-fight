@@ -25,9 +25,11 @@ int game_screen(square_application* application) {
 
 	int next_screen = HOME_SCREEN;
 
+	unsigned int game_is_over = 0;
+
 	char text_content[50] = { '\0' };
 
-	SDL_Color text_color = { 0xFF, 0XFF, 0XFF };
+	SDL_Color text_color = { 0xFF, 0xFF, 0xFF };
 
 	SDL_Rect header = { 0, 0, SCREEN_WIDTH, 60 };
 
@@ -42,6 +44,14 @@ int game_screen(square_application* application) {
 	SDL_Texture* back_texture;
 
 	SDL_Rect back_position = { 0, 0, SCREEN_WIDTH / 3, 50 };
+
+	SDL_Surface* game_over_surface;
+
+	SDL_Texture* game_over_texture;
+
+	SDL_Color game_over_text_color = { 0x00, 0x00, 0x00 };
+
+	SDL_Rect game_over_position = { (SCREEN_WIDTH / 2) - ((SCREEN_WIDTH / 4) / 2), SCREEN_HEIGHT / 4, SCREEN_WIDTH / 4, 50 };
 
 	SDL_Event event;
 
@@ -127,6 +137,35 @@ int game_screen(square_application* application) {
 	}
 
 
+	game_over_surface = TTF_RenderText_Solid(application->font, "Game Over!!!", game_over_text_color);
+
+	if (game_over_surface == NULL) {
+		fprintf(application->log_file, "Unable to render game over surface! SDL_ttf Error: %s\n", TTF_GetError());
+
+		free(bullet_actors);
+		free(enemy_actors);
+		
+		SDL_DestroyTexture(back_texture);
+
+		return QUIT_SCREEN;
+	}
+	
+	game_over_texture = SDL_CreateTextureFromSurface(application->renderer, game_over_surface);
+
+	SDL_FreeSurface(game_over_surface);
+
+	if (game_over_texture == NULL) {
+		fprintf(application->log_file, "Unable to create texture from rendered game over! SDL Error: %s\n", SDL_GetError());
+
+		free(bullet_actors);
+		free(enemy_actors);
+		
+		SDL_DestroyTexture(back_texture);
+
+		return QUIT_SCREEN;
+	}
+
+
 	move_actors_start_time = SDL_GetTicks();
 
 	create_enemy_actor_start_time = SDL_GetTicks();
@@ -152,6 +191,10 @@ int game_screen(square_application* application) {
 				}
 
 			} else if (event.type == SDL_KEYDOWN) {
+
+				if (game_is_over == 1) {
+					continue;
+				}
 
 				switch (event.key.keysym.sym) {
 					case SDLK_UP:
@@ -211,6 +254,10 @@ int game_screen(square_application* application) {
 						break;
 				}
 			}
+		}
+
+		if (game_is_over == 1) {
+			continue;
 		}
 
 
@@ -288,6 +335,15 @@ int game_screen(square_application* application) {
 					enemy_actors[i].y += 4;
 				}
 			}
+
+			if (
+				enemy_actors[i].x < (shooter_actor.x + shooter_actor.w) &&
+				(enemy_actors[i].x + enemy_actors[i].w) > shooter_actor.x &&
+				enemy_actors[i].y < (shooter_actor.y + shooter_actor.h) &&
+				(enemy_actors[i].y + enemy_actors[i].h) > shooter_actor.y
+			) {
+				game_is_over = 1;
+			}
 		}
 
 		if ((move_actors_current_time - move_actors_start_time) >= MOVE_ACTORS_TIME_LIMIT) {
@@ -333,6 +389,10 @@ int game_screen(square_application* application) {
 		
 		SDL_RenderCopy(application->renderer, back_texture, NULL, &back_position);
 
+		if (game_is_over == 1) {
+			SDL_RenderCopy(application->renderer, game_over_texture, NULL, &game_over_position);
+		}
+
 
 		SDL_RenderPresent(application->renderer);
 	}
@@ -343,6 +403,7 @@ int game_screen(square_application* application) {
 
 	SDL_DestroyTexture(score_texture);
 	SDL_DestroyTexture(back_texture);
+	SDL_DestroyTexture(game_over_texture);
 
 	return next_screen;
 }
