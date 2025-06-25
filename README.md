@@ -2,10 +2,28 @@
 
 An SDL based game of a squares shooting squares at other squares 🟥❎🟨🚀😎
 
-## Build
+*This application was built on and has only been tested on Windows OS*
 
-`gcc ./src/main.c ./src/application.c ./src/main_menu.c ./src/score_recorder.c ./src/home_screen.c ./src/game_screen.c ./src/scores_screen.c -I./includes -I./libs/SDL2-2.30.3/include/SDL2 -I./libs/SDL2_ttf-2.24.0/include/SDL2 -L./libs/SDL2-2.30.3/lib -L./libs/SDL2_ttf-2.24.0/lib -w -Wl,-subsystem,windows -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -o ./build/SquareFight`
+## Install
+
+- Download the zip of the latest release
+- Unzip the contents to any folder preferably a folder named **SquareFight**
 
 ## Run
 
-`.\build\SquareFight.exe`
+In the contents of the unzipped file you will find the **SquareFight.exe**
+
+Double click on it from the file explorer or run this command from the terminal `.\SquareFight.exe`
+
+## Dependencies
+
+- SDL2
+- SDL2_ttf
+
+## Build
+
+You can also build the applicaiton from source
+
+### Windows MinGW
+
+Run the command `mingw32-make.exe`
