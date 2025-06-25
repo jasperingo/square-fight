@@ -14,6 +14,6 @@ Uint8 square_record_score(square_application* application, Uint64 score);
 
 square_scores* square_read_scores(square_application* application);
 
-void square_read_scores_cleanup(square_scores* scores);
+void square_scores_cleanup(square_scores* scores);
 
 #endif

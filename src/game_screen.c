@@ -47,11 +47,11 @@ int game_screen(square_application* application) {
 	
 	Uint64 high_socre = 0;
 
-	char text_content[50] = { '\0' };
-
 	SDL_Color text_color = { 0xFF, 0xFF, 0xFF };
-
+	
 	SDL_Rect header = { 0, 0, SCREEN_WIDTH, 60 };
+	
+	char score_content[50] = { '\0' };
 
 	SDL_Surface* score_surface;
 
@@ -397,9 +397,9 @@ int game_screen(square_application* application) {
 		SDL_RenderFillRect(application->renderer, &header);
 		
 
-		sprintf(text_content, "Score: %d", high_socre);
+		sprintf(score_content, "Score: %d", high_socre);
 
-		score_surface = TTF_RenderText_Solid(application->font, text_content, text_color);
+		score_surface = TTF_RenderText_Solid(application->font, score_content, text_color);
 
 		if (score_surface == NULL) {
 			fprintf(application->log_file, "Unable to render score surface! SDL_ttf Error: %s\n", TTF_GetError());
