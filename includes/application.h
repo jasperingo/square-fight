@@ -16,6 +16,7 @@
 
 typedef struct {
   FILE* log_file;
+  FILE* score_file;
 	TTF_Font* font;
   SDL_Window* window;
 	SDL_Renderer* renderer;

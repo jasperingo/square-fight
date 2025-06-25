@@ -5,6 +5,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include "application.h"
+#include "score_recorder.h"
 
 #define SHOOTER_WIDTH 20
 #define SHOOTER_HEIGHT 20
@@ -428,6 +429,8 @@ int game_screen(square_application* application) {
 
 		if (game_is_over == 1) {
 			SDL_RenderCopy(application->renderer, game_over_texture, NULL, &game_over_position);
+			
+			square_record_score(application, high_socre);
 		}
 
 

@@ -61,7 +61,7 @@ square_main_menu* square_main_menu_init(square_application* application) {
 }
 
 void square_main_menu_cleanup(square_main_menu* main_menu) {
-	Uint8 i;
+	Uint16 i;
 
 	for (i = 0; i < main_menu->size; i++) {
 		SDL_DestroyTexture(main_menu->items[i].texture);

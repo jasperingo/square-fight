@@ -8,13 +8,24 @@ square_application* square_application_init(void) {
 	}
 
 	application->log_file = NULL;
+	application->score_file = NULL;
 	application->renderer = NULL;
 	application->window = NULL;
 	application->font = NULL;
 
-	application->log_file = fopen("logs/logfile.txt", "w");
+	application->log_file = fopen("logs/logfile.txt", "a");
 
 	if (application->log_file == NULL) {
+		square_application_cleanup(application);
+
+		return NULL;
+	}
+
+	application->score_file = fopen("logs/scores.bin", "ab+");
+
+	if (application->score_file == NULL) {
+		fprintf(application->log_file, "Failed to open scores file\n");
+
 		square_application_cleanup(application);
 
 		return NULL;
@@ -86,6 +97,10 @@ void square_application_cleanup(square_application* application) {
 
 		if (application->log_file != NULL) {
 			fclose(application->log_file);
+		}
+
+		if (application->score_file != NULL) {
+			fclose(application->score_file);
 		}
 	
 		TTF_Quit();
