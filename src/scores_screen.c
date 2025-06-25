@@ -16,28 +16,38 @@ int scores_screen(square_application* application) {
 
   square_scores* scores;
 
-  SDL_Color text_color = { 0xFF, 0xFF, 0xFF };
-	
 	SDL_Rect header = { 0, 0, SCREEN_WIDTH, 60 };
-
-	SDL_Surface* back_surface;
-
+  
+	SDL_Surface* text_surface;
+  
 	SDL_Texture* back_texture;
 
+  SDL_Color back_color = { 0xFF, 0xFF, 0xFF };
+  
 	SDL_Rect back_position = { 0, 0, SCREEN_WIDTH / 3, 50 };
+  
+  Uint64 scores_textures_size;
+  
+	SDL_Texture** scores_textures;
+  
+	SDL_Texture** temp_scores_textures;
+  
+  SDL_Color score_color = { 0x00, 0x00, 0x00 };
+
+	SDL_Rect score_position = { 0, header.h, SCREEN_WIDTH / 2, 30 };
 
 
-  back_surface = TTF_RenderText_Solid(application->font, "< Back", text_color);
+  text_surface = TTF_RenderText_Solid(application->font, "< Back", back_color);
 
-	if (back_surface == NULL) {
+	if (text_surface == NULL) {
 		fprintf(application->log_file, "Unable to render back surface! SDL_ttf Error: %s\n", TTF_GetError());
 
 		return QUIT_SCREEN;
 	}
 	
-	back_texture = SDL_CreateTextureFromSurface(application->renderer, back_surface);
+	back_texture = SDL_CreateTextureFromSurface(application->renderer, text_surface);
 
-	SDL_FreeSurface(back_surface);
+	SDL_FreeSurface(text_surface);
 
 	if (back_texture == NULL) {
 		fprintf(application->log_file, "Unable to create texture from rendered back! SDL Error: %s\n", SDL_GetError());
@@ -57,9 +67,58 @@ int scores_screen(square_application* application) {
 	}
 
 
+  scores_textures_size = 0;
+
+  scores_textures = malloc(sizeof(*scores_textures));
+
+  if (scores_textures == NULL) {
+	  fprintf(application->log_file, "Unable to allocate memory for scores_textures\n");
+    
+    square_scores_cleanup(scores);
+
+		SDL_DestroyTexture(back_texture);
+    
+		return QUIT_SCREEN;
+	}
+
   for (i = 0; i < scores->size; i++) {
     fprintf(application->log_file, "High score: %s\n", scores->items[i]);
     fflush(application->log_file);
+
+    if (scores_textures_size > 0) {
+      temp_scores_textures = realloc(scores_textures, (scores_textures_size + 1) * sizeof(*scores_textures));
+
+      if (temp_scores_textures == NULL) {
+        fprintf(application->log_file, "Unable to re-allocate memory for scores_textures\n");
+        fflush(application->log_file);
+        
+        continue;
+      }
+      
+      scores_textures = temp_scores_textures;
+    }
+    
+    text_surface = TTF_RenderText_Solid(application->font, scores->items[i], score_color);
+    
+    if (text_surface == NULL) {
+      fprintf(application->log_file, "Unable to render score surface! SDL_ttf Error: %s\n", TTF_GetError());
+      fflush(application->log_file);
+      
+      continue;
+    }
+    
+    scores_textures[scores_textures_size] = SDL_CreateTextureFromSurface(application->renderer, text_surface);
+    
+    SDL_FreeSurface(text_surface);
+    
+    if (scores_textures[scores_textures_size] == NULL) {
+      fprintf(application->log_file, "Unable to create texture from rendered score! SDL Error: %s\n", SDL_GetError());
+      fflush(application->log_file);
+
+      continue;
+    }
+  
+    scores_textures_size++;
 	}
 
 
@@ -89,18 +148,35 @@ int scores_screen(square_application* application) {
 
 		SDL_RenderClear(application->renderer);
 
-    SDL_SetRenderDrawColor(application->renderer, 0x00, 0x00, 0x00, 0x00);   
+    SDL_SetRenderDrawColor(application->renderer, 0x00, 0x00, 0x00, 0x00); 
 
 		SDL_RenderFillRect(application->renderer, &header);
 
 		SDL_RenderCopy(application->renderer, back_texture, NULL, &back_position);
+    
+    SDL_SetRenderDrawColor(application->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    
+    
+    for (i = 0; i < scores_textures_size; i++) {
+      score_position.y = header.h + 5 + (i * score_position.h);
+
+      SDL_RenderCopy(application->renderer, scores_textures[i], NULL, &score_position);
+    }
+
 
 		SDL_RenderPresent(application->renderer);
   }
 
+
   square_scores_cleanup(scores);
 
   SDL_DestroyTexture(back_texture);
+
+  for (i = 0; i < scores_textures_size; i++) {    
+    SDL_DestroyTexture(scores_textures[i]);
+  }
+
+  free(scores_textures);
 
   return next_screen;
 }
