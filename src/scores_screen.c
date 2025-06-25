@@ -152,8 +152,8 @@ int scores_screen(square_application* application) {
 	}
 
   for (i = 0; i < scores->size; i++) {
-    fprintf(application->log_file, "High score: %s\n", scores->items[i]);
-    fflush(application->log_file);
+    // fprintf(application->log_file, "High score: %s\n", scores->items[i]);
+    // fflush(application->log_file);
 
     if (scores_textures_size > 0) {
       temp_scores_textures = realloc(scores_textures, (scores_textures_size + 1) * sizeof(*scores_textures));
