@@ -1,6 +1,6 @@
 # SquareFight
 
-An SDL based game of a squares shooting squares at other squares 🟥❎🟨🚀😎
+A game about a square shooting squares at other squares 🟥❎🟨
 
 *This application was built on and has only been tested on Windows OS*
 
